@@ -1,0 +1,141 @@
+{
+  "project_metadata": {
+    "status": "MVP Complete - Ready for Testing",
+    "version": "1.0.11",
+    "current_phase": "Hour 8: Testing & Basic Polish - COMPLETED",
+    "next_phase": "Physical Device Testing & Deployment"
+  },
+  "core_problem": "My dad is experiencing forgetting to pee every 2 hours despite needing to during all times and everywhere (except during sleep), which leads to health issues.",
+  "problem_details": {
+    "who": "My dad",
+    "problem": "Needs to pee every 2 hours but always forgets",
+    "when_where": "All the time, everywhere (except during sleep)",
+    "impact": "Health issues (affects recovery from BPH surgery)",
+    "frequency_requirement": "Every 2 hours (medically prescribed, only during waking hours)",
+    "important_constraint": "Reminders NOT needed during sleep"
+  },
+  "medical_context": {
+    "condition": "Recovery phase after surgery for benign prostatic hyperplasia (BPH)",
+    "requirement": "Active peeing every 2 hours is required to exercise the bladder",
+    "underlying_issue": "Bladder has problems due to long-time benign prostatic hyperplasia",
+    "purpose": "Critical part of post-surgical rehabilitation",
+    "notes": "Regular 2-hour intervals are medically necessary for bladder rehabilitation"
+  },
+  "tech_stack": {
+    "platform_strategy": "Native Android Development (Android 11+ only)",
+    "deployment": "Direct APK installation (no app store distribution)",
+    "rationale": "Critical for medical app reliability - native APIs provide best background notification reliability and DND override capabilities",
+    "android": {
+      "target_sdk": "Android 11+ (API 30+)",
+      "language": "Kotlin",
+      "ui_framework": "Jetpack Compose",
+      "notification_framework": "NotificationManagerCompat + WorkManager + AlarmManager.setExactAndAllowWhileIdle()",
+      "data_persistence": "SharedPreferences (MVP), Room Database (future if needed)",
+      "architecture": "MVVM (Model-View-ViewModel)",
+      "testing": "JUnit + Espresso"
+    },
+    "dependencies": {
+      "required": [
+        "Platform-native notification APIs (no third-party push services needed for local notifications)",
+        "Local storage (UserDefaults/SharedPreferences)"
+      ],
+      "avoid": [
+        "Cloud services (out of scope)",
+        "Analytics SDKs (privacy requirement)",
+        "Third-party notification services (not needed for local notifications)"
+      ]
+    }
+  },
+  "system_architecture": {
+    "core_components": [
+      "Timer Manager - Manages 2-hour timer logic, state transitions, retry mechanism",
+      "Alarm Service - Schedules and cancels exact alarms using AlarmManager.setExactAndAllowWhileIdle()",
+      "Notification Service - Platform-specific notification scheduling and delivery",
+      "Reminder Receiver - Handles alarm triggers and shows notifications",
+      "Boot Receiver - Reschedules alarms after device reboot",
+      "Storage Service - Persists app state (sleep mode, timer state, settings)",
+      "UI Layer - Display information, handle user interactions (MVVM pattern)"
+    ],
+    "key_interactions": [
+      "App Launch → Load state → Calculate next reminder → Schedule alarm → Schedule notification",
+      "Alarm Trigger → ReminderReceiver → Check sleep mode → Display notification → Schedule retry alarm",
+      "Retry Alarm Trigger → ReminderReceiver → Show retry notification",
+      "User Acknowledges → Reset timer → Cancel retry alarm → Schedule next reminder alarm → Update UI",
+      "Retry Mechanism → 15-minute alarm → Retry notification → Handle cascade prevention",
+      "Sleep Mode Toggle → Cancel all alarms → Update state",
+      "Device Reboot → BootReceiver → Load state → Recalculate → Reschedule alarms"
+    ]
+  },
+  "critical_bottlenecks": [
+    "Background notification reliability - Android WorkManager + AlarmManager.setExactAndAllowWhileIdle() (Android 11+)",
+    "DND override - Android varies by manufacturer, requires battery optimization exemption",
+    "Timer state persistence - Need reliable local storage + recovery mechanism",
+    "Retry mechanism state tracking - Multiple timer states require careful state machine design"
+  ],
+  "resource_heavy_tasks": {
+    "time_intensive": [
+      "Cross-platform development: 2-3x single-platform time",
+      "Background service implementation: 40-60 hours",
+      "Notification system: 30-40 hours",
+      "State management & persistence: 20-30 hours"
+    ],
+    "cost_intensive": [
+      "Device testing: $200-500 for Android 11+ test devices (if not available)",
+      "Note: Direct APK installation, no app store accounts needed"
+    ]
+  },
+  "scalability_concerns": [
+    "Single-user design - No scalability concerns for MVP (by design)",
+    "Timer accuracy across long periods - Need to recalculate on app launch",
+    "Battery optimization aggressiveness - Android devices vary, may require user configuration",
+    "Platform fragmentation - Different Android manufacturers have different behaviors"
+  ],
+  "decisions_log": [
+    "Decision 1: Problem defined - Reminder system needed for 2-hour intervals during waking hours only",
+    "Decision 2: Solution selected - Smartphone app (Solution 1) for MVP",
+    "Decision 3: Manual sleep toggle for MVP (no automatic detection)",
+    "Decision 4: Local-only storage for MVP (no cloud sync)",
+    "Decision 5: Hybrid timer approach - follows user dismissal with fallback retry mechanism",
+    "Decision 6: Override DND mode - health reminders always work (prevents accidental blocking)",
+    "Decision 7: Acknowledgment button hidden by default, can be enabled in settings",
+    "Decision 8: Native Android development chosen over cross-platform (React Native/Flutter) for reliability",
+    "Decision 9: Android 11+ (API 30+) target - uses Jetpack Compose + WorkManager + AlarmManager.setExactAndAllowWhileIdle()",
+    "Decision 10: MVVM architecture pattern",
+    "Decision 11: SharedPreferences for MVP storage (can upgrade later)",
+    "Decision 12: Direct APK installation - no app store distribution needed",
+    "Decision 13: AlarmManager.setExactAndAllowWhileIdle() for reliable background reminders (Hour 5)",
+    "Decision 14: BootReceiver for alarm recovery after device reboot (Hour 5)",
+    "Decision 15: AlarmService wrapper class for centralized alarm management (Hour 5)",
+    "Decision 16: MainViewModel for UI state management with countdown timer updates (Hour 6)",
+    "Decision 17: MainScreen composable with large, accessible UI elements for elderly users (Hour 6)",
+    "Decision 18: SettingsScreen with acknowledgment button visibility toggle (Hour 7)",
+    "Decision 19: Simple state-based navigation between MainScreen and SettingsScreen (Hour 7)",
+    "Decision 20: Onboarding completion marked after first permission request (Hour 7)",
+    "Decision 21: All unit tests passing - TimerManager, NotificationService tested (Hour 8)",
+    "Decision 22: Fixed deprecation warnings - using Icons.AutoMirrored.Filled.ArrowBack (Hour 8)"
+  ],
+  "current_blockers": [
+    "Need to clarify timer recovery behavior after long device off period",
+    "Need to clarify sleep mode toggle behavior during active reminder"
+  ],
+  "requirements_document": "Requirements.md (v1.0.1) - Finalized and approved for MVP development",
+  "architecture_document": "ARCHITECTURE-AUDIT.md (v1.0.0) - Technical audit and architecture design complete",
+  "project_plan": "PROJECT-PLAN.md (v1.0.0) - 6-phase development plan with timelines and risk assessment",
+  "mvp_8hour_plan": "MVP-8HOUR-PLAN.md (v1.0.0) - Aggressive 8-hour MVP development plan with hour-by-hour breakdown",
+  "project_timeline": {
+    "development_mode": "AI-Assisted Development",
+    "total_duration": "6-10 weeks (1.5-2.5 months) with AI assistance",
+    "total_effort": "60-90 hours with AI assistance",
+    "ai_acceleration": "40-60% time savings on code generation, architecture, UI, and documentation",
+    "phases": [
+      "Phase 1: Project Setup & Foundation (2-3 days, LOW risk, 60% AI acceleration)",
+      "Phase 2: Core Timer Logic (1-2 weeks, MEDIUM risk, 50% AI acceleration)",
+      "Phase 3: Notification System (1.5-2.5 weeks, HIGH risk, 40% AI acceleration)",
+      "Phase 4: UI Implementation (1-2 weeks, MEDIUM risk, 60% AI acceleration)",
+      "Phase 5: Integration & Polish (1-2 weeks, MEDIUM risk, 30% AI acceleration)",
+      "Phase 6: Testing & Deployment (3-5 days, LOW risk, 20% AI acceleration)"
+    ],
+    "note": "Physical device testing and integration debugging still require significant human time"
+  }
+}
+
